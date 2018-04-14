@@ -1,0 +1,19 @@
+function [conf, debugParetoFront] = FON(debugParetoFrontSize)
+    objectives = { objective.FON_1(1:3), objective.FON_2(1:3) };
+    
+    debugParetoFrontVariables = repmat( ...
+        transpose(linspace(-1/sqrt(3), 1/sqrt(3), debugParetoFrontSize)), ...
+        1, 3 ...
+    );
+    debugParetoFront = generateEvaluatedParetoFront( ...
+        debugParetoFrontVariables, ...
+        objectives ...
+    );
+
+    conf = config.Config();
+    conf.name = mfilename();
+    conf.variables = [ conf.variables ; 
+        num2cell(repmat([-4 4], 3, 1))
+    ];
+    conf.objectives = objectives;
+end
