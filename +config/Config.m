@@ -22,16 +22,25 @@ classdef Config < handle
     
     methods
         function obj = Config()
-            obj.maxIteration = 100;
-            obj.countScouts = 50;
-            obj.countBestSites = 8;
-            obj.countEliteSites = 3;
-            obj.countBestSitesRecruits = 3;
-            obj.countEliteSitesRecruits = 5;
-            obj.patchShrinkingFactor = 0.8;
-            obj.maxCountStagnation = 7;
+            obj.maxIteration = 205;
+            obj.countScouts = 30;
+            obj.countBestSites = 10;
+            obj.countEliteSites = 6;
+            obj.countBestSitesRecruits = 10;
+            obj.countEliteSitesRecruits = 100;
+            obj.patchShrinkingFactor = 0.95;
+            obj.maxCountStagnation = 100;
             obj.display = {display.Iteration()};
             obj.variables = table([], [], 'VariableNames', {'min' 'max'});
+        end
+        
+        function size = getPopSize(obj)
+            nonSelectedBees = obj.countScouts - obj.countBestSites;
+            bestNonEliteBeesAndRecruits = (obj.countBestSites - obj.countEliteSites) * ...
+                obj.countBestSitesRecruits;
+            eliteBeesAndRecruits = obj.countEliteSites * obj.countEliteSitesRecruits;
+            
+            size = nonSelectedBees + bestNonEliteBeesAndRecruits + eliteBeesAndRecruits;
         end
         
         function size = getInitialPatchSize(obj)

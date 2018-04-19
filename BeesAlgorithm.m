@@ -8,7 +8,7 @@ classdef BeesAlgorithm
             obj.config = config;
         end
         
-        function best = run(obj)
+        function eliteSolutions = run(obj)
             countScouts = obj.config.countScouts;
             countNonBestScouts = countScouts - obj.config.countBestSites;
             
@@ -25,8 +25,9 @@ classdef BeesAlgorithm
                 scouts = [elite, justBest, others];
             end
             
-            best = [elite.solution, justBest.solution];
-            obj.finalPrint(best);
+            elite = obj.waggleDance(scouts);
+            eliteSolutions = [elite.solution];
+            obj.finalPrint(eliteSolutions);
         end
         
         function scouts = globalSearch(obj, countScouts)
@@ -40,16 +41,15 @@ classdef BeesAlgorithm
         function scout = searchFlowerPatch(obj)
             vars = obj.config.variables;
             countVariables = height(vars);
+            mins = vars.min;
+            maxs = vars.max;
             
             scout = FlowerPatch();
             scout.size = obj.config.getInitialPatchSize();
             scout.solution.variables = nan(1, countVariables);
             
-            for i=1:countVariables
-                min = vars{i, 'min'};
-                max = vars{i, 'max'};
-                
-                scout.solution.variables(i) = utils.randBetween(min, max);
+            for i=1:countVariables                
+                scout.solution.variables(i) = utils.randBetween(mins(i), maxs(i));
             end
             
             scout.solution = evaluation.objectivesEvaluation(scout.solution, obj.config.objectives);
@@ -103,16 +103,17 @@ classdef BeesAlgorithm
             scoutBee.stagnation = true;
             size = scoutBee.size;
             vars = scoutBee.solution.variables;
+            countVars = height(obj.config.variables);
             min = vars - size;
             max = vars + size;
+
+            someRandomValues = min + (max - min) .* ...
+                rand(countRecruitedBees, countVars);
             
             bestScoutBee = scoutBee;
             for i=1:countRecruitedBees
                 bee = Solution();
-                
-                for j=1:height(obj.config.variables)
-                    bee.variables(j) = utils.randBetween(min(j), max(j));
-                end
+                bee.variables = someRandomValues(i,:);
                 
                 bee = evaluation.objectivesEvaluation(bee, obj.config.objectives);
                 if evaluation.paretoDominates(bee, scoutBee.solution)
